@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
     private void initializer() {
+        //test
         name[0] = (EditText) findViewById(R.id.name1);
         name[1] = (EditText) findViewById(R.id.name2);
         name[2] = (EditText) findViewById(R.id.name3);
