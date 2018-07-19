@@ -23,13 +23,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    int numPlayers, curRound, totalRound;
-    class Player{
-        String name;
-        int guess;
-        int score;
-    };
-
+    int numPlayers, curRound, totalRound, bidDiff;
+    int [] curScore = new int[6];
     EditText [] name = new EditText[6];
     EditText [] bid = new EditText[6];
     EditText [] win = new EditText[6];
@@ -41,24 +36,40 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initializer();
+        initializeViews();
         curRound = 0;
 
-        Toast.makeText(getApplicationContext(),"BRIDGE", Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),"SCORE", Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),"TRACKER", Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(),"YEA!!!", Toast.LENGTH_SHORT).show();
+
         Toast.makeText(getApplicationContext(),"Input names and click Start", Toast.LENGTH_LONG).show();
 
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (nextButton.getText().toString().equals("Start Game")) {
+                    initializeTracker();
+                } else if (curRound == totalRound) {
+
+
+                } else {
+                    updateScore();
+                    resetBidsAndWins();
+                }
+                curRound++;
+                round.setText("Round " + curRound);
+
+
+            }
+        });
 
 
 
-        numPlayers = getNumPlayers();
-        Player [] playerArray = new Player [numPlayers];
+
+       // numPlayers = getNumPlayers();
 
 
         }
-    private void initializer() {
+    private void initializeViews(){
         //test
         name[0] = (EditText) findViewById(R.id.name1);
         name[1] = (EditText) findViewById(R.id.name2);
@@ -81,11 +92,57 @@ public class MainActivity extends AppCompatActivity {
         win[4] = (EditText) findViewById(R.id.win5);
         win[5] = (EditText) findViewById(R.id.win6);
 
+        score[0] = (TextView) findViewById(R.id.score1);
+        score[1] = (TextView) findViewById(R.id.score2);
+        score[2] = (TextView) findViewById(R.id.score3);
+        score[3] = (TextView) findViewById(R.id.score4);
+        score[4] = (TextView) findViewById(R.id.score5);
+        score[5] = (TextView) findViewById(R.id.score6);
+
         round = (TextView) findViewById(R.id.round);
         nextButton = (Button) findViewById(R.id.nextButton);
 
 
     }
+
+    private void initializeTracker(){
+        for (int i = 0; i < 6; i++) {
+            if (name[i].getText().toString().equals("")) {
+                numPlayers = i;
+                break;
+            }
+            score[i].setText(Integer.toString(curScore[i]));
+        }
+
+        for (int j = numPlayers; j  < 6; j++) {
+            name[j].setVisibility(View.INVISIBLE);
+            bid[j].setVisibility(View.INVISIBLE);
+            win[j].setVisibility(View.INVISIBLE);
+            score[j].setVisibility(View.INVISIBLE);
+        }
+
+
+
+        nextButton.setText("Next Round");
+        totalRound = 52/numPlayers;
+
+        Toast.makeText(getApplicationContext(),"Input Bids and Wins", Toast.LENGTH_LONG).show();
     }
 
+    private void updateScore(){
+        for (int i = 0; i < numPlayers; i++){
+            bidDiff = Integer.valueOf(bid[i].getText().toString()) - Integer.valueOf(win[i].getText().toString());
+
+
+            curScore[i] += (bidDiff == 0) ? (10 + bidDiff * bidDiff) : -(bidDiff*bidDiff);
+            score[i].setText(Integer.toString(curScore[i]));
+        }
+    }
+
+    private void resetBidsAndWins(){
+        for (int i = 0; i < numPlayers; i++){
+            bid[i].setText("");
+            win[i].setText("");
+        }
+    }
 }
