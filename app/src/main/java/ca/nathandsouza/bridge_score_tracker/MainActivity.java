@@ -1,5 +1,8 @@
 package ca.nathandsouza.bridge_score_tracker;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,7 +26,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    int numPlayers, curRound, totalRound, bidDiff;
+    int numPlayers, curRound, totalRound, bidDiff, winnerPosition;
     int [] curScore = new int[6];
     EditText [] name = new EditText[6];
     EditText [] bid = new EditText[6];
@@ -40,33 +43,27 @@ public class MainActivity extends AppCompatActivity {
         curRound = 0;
 
 
-        Toast.makeText(getApplicationContext(),"Input names and click Start", Toast.LENGTH_LONG).show();
 
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (nextButton.getText().toString().equals("Start Game")) {
-                    initializeTracker();
+                if (curRound == 0) {
+                    newGame();
                 } else if (curRound == totalRound) {
+                    endGame();
 
-
-                } else {
+                } else if (curRound == -1) {
+                    resetGame();
+                }else{
                     updateScore();
                     resetBidsAndWins();
                 }
-                curRound++;
-                round.setText("Round " + curRound);
+
 
 
             }
         });
-
-
-
-
-       // numPlayers = getNumPlayers();
-
 
         }
     private void initializeViews(){
@@ -102,41 +99,75 @@ public class MainActivity extends AppCompatActivity {
         round = (TextView) findViewById(R.id.round);
         nextButton = (Button) findViewById(R.id.nextButton);
 
+        for (int i = 0; i < 6; i++){
+            bid[i].setVisibility(View.INVISIBLE);
+            win[i].setVisibility(View.INVISIBLE);
+            score[i].setVisibility(View.INVISIBLE);
+        }
+
 
     }
 
-    private void initializeTracker(){
+    private void newGame(){
         for (int i = 0; i < 6; i++) {
             if (name[i].getText().toString().equals("")) {
+                if (i == 0)  {
+                    Toast.makeText(getApplicationContext(),"Input names u clown", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 numPlayers = i;
                 break;
             }
+
+            bid[i].setVisibility(View.VISIBLE);
+            win[i].setVisibility(View.VISIBLE);
+            score[i].setVisibility(View.VISIBLE);
             score[i].setText(Integer.toString(curScore[i]));
+            name[i].setEnabled(false);
         }
 
         for (int j = numPlayers; j  < 6; j++) {
             name[j].setVisibility(View.INVISIBLE);
-            bid[j].setVisibility(View.INVISIBLE);
-            win[j].setVisibility(View.INVISIBLE);
-            score[j].setVisibility(View.INVISIBLE);
         }
 
 
 
         nextButton.setText("Next Round");
         totalRound = 52/numPlayers;
+        curRound++;
+        round.setText("Round " + curRound);
 
-        Toast.makeText(getApplicationContext(),"Input Bids and Wins", Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),"Input Bids and Wins", Toast.LENGTH_LONG).show();
     }
 
     private void updateScore(){
         for (int i = 0; i < numPlayers; i++){
-            bidDiff = Integer.valueOf(bid[i].getText().toString()) - Integer.valueOf(win[i].getText().toString());
-
-
-            curScore[i] += (bidDiff == 0) ? (10 + bidDiff * bidDiff) : -(bidDiff*bidDiff);
-            score[i].setText(Integer.toString(curScore[i]));
+            if (bid[i].getText().toString().equals("") ||
+                   (win[i].getText().toString()).equals("")){
+                Toast.makeText(getApplicationContext(),"bro input a number", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
+
+        for (int i = 0; i < numPlayers; i++){
+            int bids = Integer.valueOf(bid[i].getText().toString());
+            int wins = Integer.valueOf(win[i].getText().toString());
+            bidDiff = bids - wins;
+            // bidDiff = Integer.valueOf(bid[i].getText().toString()) - Integer.valueOf(win[i].getText().toString());
+
+
+            //curScore[i] += (bidDiff == 0) ? (10 + bidDiff * bidDiff) : -(bidDiff*bidDiff);
+            if (bidDiff == 0){
+                curScore[i] += bids * bids + 10;
+            } else {
+                curScore[i] -= bidDiff * bidDiff;
+            }
+            score[i].setText(Integer.toString(curScore[i]));
+
+        }
+
+        curRound++;
+        round.setText("Round " + curRound);
     }
 
     private void resetBidsAndWins(){
@@ -144,5 +175,37 @@ public class MainActivity extends AppCompatActivity {
             bid[i].setText("");
             win[i].setText("");
         }
+    }
+
+    private void endGame(){
+        winnerPosition = 0;
+        for (int i = 0; i < numPlayers; i++){
+            if (curScore[i] > curScore[winnerPosition]) winnerPosition = i;
+            bid[i].setVisibility(View.INVISIBLE);
+            win[i].setVisibility(View.INVISIBLE);
+        }
+        nextButton.setText("New Game");
+        round.setText(name[winnerPosition].getText().toString() + "wins!!!!!");
+        round.setTextColor(Color.RED);
+        round.setTypeface(null, Typeface.BOLD);
+        curRound = -1;
+
+
+    }
+
+    private void resetGame(){
+        for (int i = 0; i < 6; i++){
+            curScore[i] = 0;
+            name[i].setVisibility(View.VISIBLE);
+            name[i].setEnabled(true);
+            name[i].setText("");
+            bid[i].setText("");
+            win[i].setText("");
+            score[i].setText("");
+            score[i].setVisibility(View.INVISIBLE);
+        }
+        nextButton.setText("Start Game");
+        round.setText("Input Names and Click Start");
+        curRound = 0;
     }
 }
