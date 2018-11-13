@@ -1,5 +1,6 @@
 # BridgeScoreTracker
 Now on the play store!!!!!
+https://play.google.com/store/apps/details?id=ca.nathandsouza.bridge_score_tracker&hl=en
 
 An app to keep track of score whilst playing German Bridge, a card game. 
 
